@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cine Player</title>
+  <!-- Estilos do Player -->
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <style>
+    body {
+      background-color: #0e1117;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    .player-wrapper {
+      width: 90%;
+      max-width: 960px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player-wrapper">
+    <video id="player" playsinline controls preload="metadata">
+      <!-- Cole o link direto do seu vídeo .mp4 na propriedade src abaixo -->
+      <source src="https://SEU-LINK-DIRETO-AQUI.mp4" type="video/mp4" />
+      
+      <!-- Suporte a legendas (opcional) -->
+      <!-- <track kind="captions" label="Português" srclang="pt" src="legendas.vtt" default> -->
+      
+      Seu navegador não suporta a reprodução de vídeo.
+    </video>
+  </div>
+
+  <!-- Scripts do Player -->
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+  <script>
+    const player = new Plyr('#player', {
+      controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'fullscreen']
+    });
+  </script>
+</body>
+</html>
