@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.kewennrdgs.twa",
+        "sha256_cert_fingerprints": ["54:40:81:9D:95:B1:E3:2D:49:EB:90:90:F2:21:DE:25:BA:9D:A3:93:15:6B:40:D0:C2:D2:5D:0C:44:48:80:F0"]
+      }
+    }]
