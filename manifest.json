@@ -1,14 +1,14 @@
 {
   "id": "/",
-  "name": "Cine Catálogo",
+  "name": "CineApp",
   "short_name": "CineApp",
-  "description": "Reprodutor de vídeo com catálogo e retenção de progresso",
+  "description": "Aplicativo de Streaming de Vídeo",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0b0e14",
   "theme_color": "#0b0e14",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
@@ -29,14 +29,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Ecrã principal do catálogo"
+      "label": "Ecrã principal"
     },
     {
       "src": "screenshot2.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Reprodutor de vídeo no dispositivo móvel"
+      "label": "Player de vídeo"
     }
   ]
 }

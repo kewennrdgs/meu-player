@@ -2,253 +2,435 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cine Catálogo com Retomada de Vídeo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>CineApp</title>
 
-  <!-- Configurações para PWA -->
- <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#0b0e14">
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0e14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CineApp">
+  <link rel="apple-touch-icon" href="icon-192.png">
 
+  <!-- Player CSS -->
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
   <style>
-    * { box-sizing: border-box; }
+    /* --- RESET & UX NATIVA MOBILE --- */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
     body {
       background-color: #0b0e14;
       color: #ffffff;
       margin: 0;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .current-title {
-      font-size: 1.4rem;
-      margin: 10px 0 20px 0;
-      font-weight: 500;
-      color: #e2e8f0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow-x: hidden;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: calc(70px + env(safe-area-inset-bottom));
     }
 
-    /* --- NOTIFICAÇÃO: CONTINUAR DE ONDE PAROU --- */
-    .resume-banner {
-      display: none;
-      background: #1e293b;
-      border: 1px solid #3b82f6;
-      border-radius: 10px;
-      padding: 14px 20px;
-      margin-bottom: 20px;
+    /* --- TOPO / APP BAR --- */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 14, 20, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 12px 18px;
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 15px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-      animation: slideDown 0.3s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .resume-banner.active {
-      display: flex;
-    }
-    .resume-info {
+
+    .app-logo {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 0.95rem;
-      color: #e2e8f0;
+      gap: 8px;
     }
-    .resume-info strong {
-      color: #60a5fa;
-    }
-    .resume-actions {
+
+    /* --- HERO BANNER (DESTAQUE ESTILO NETFLIX) --- */
+    .hero-banner {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      background-size: cover;
+      background-position: center;
       display: flex;
-      gap: 10px;
+      align-items: flex-end;
+      padding: 20px;
+      margin-bottom: 20px;
     }
-    .btn-yes {
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11, 14, 20, 0.2) 0%, #0b0e14 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-tag {
       background: #3b82f6;
-      color: #ffffff;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+
+    .btn-play-hero {
+      background: #ffffff;
+      color: #0b0e14;
       border: none;
-      padding: 8px 18px;
-      border-radius: 6px;
-      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-yes:hover {
-      background: #2563eb;
-    }
-    .btn-no {
-      background: #334155;
-      color: #94a3b8;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-no:hover {
-      background: #475569;
-      color: #ffffff;
     }
 
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* --- BARRA DE BUSCA E FILTROS --- */
+    .section-controls {
+      padding: 0 16px;
+      margin-bottom: 20px;
     }
 
-    /* --- PLAYER WRAPPER --- */
-    .player-wrapper {
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      background: #000;
-      margin-bottom: 35px;
-    }
-
-    /* --- CONTROLES DE BUSCA E FILTRO --- */
-    .controls-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-    @media (min-width: 640px) {
-      .controls-wrapper {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
     .search-input {
+      width: 100%;
       background: #1e293b;
       border: 1px solid #334155;
       color: #ffffff;
-      padding: 10px 16px;
-      border-radius: 8px;
+      padding: 12px 16px;
+      border-radius: 12px;
       font-size: 0.95rem;
       outline: none;
-      width: 100%;
-      max-width: 320px;
+      margin-bottom: 14px;
     }
-    .search-input:focus {
-      border-color: #3b82f6;
-    }
-    .categories-filter {
+
+    .categories-scroll {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       overflow-x: auto;
-      padding-bottom: 5px;
+      scrollbar-width: none;
+      padding-bottom: 4px;
     }
-    .category-btn {
+
+    .categories-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-chip {
       background: #1e293b;
       border: 1px solid #334155;
       color: #94a3b8;
-      padding: 8px 14px;
-      border-radius: 20px;
+      padding: 8px 16px;
+      border-radius: 25px;
       font-size: 0.85rem;
-      cursor: pointer;
       white-space: nowrap;
-      transition: all 0.2s ease;
+      font-weight: 500;
     }
-    .category-btn.active {
+
+    .category-chip.active {
       background: #3b82f6;
       color: #ffffff;
       border-color: #3b82f6;
     }
 
-    /* --- GRID --- */
-    .catalog-title {
-      font-size: 1.1rem;
-      margin-bottom: 18px;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    /* --- GRADE DE FILMES (MOBILE 2 COLUNAS) --- */
+    .catalog-section {
+      padding: 0 16px;
     }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #f1f5f9;
+    }
+
     .movie-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
     }
+
+    @media (min-width: 600px) {
+      .movie-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+    }
+
     .movie-card {
       background: #1e293b;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      border: 2px solid transparent;
       display: flex;
       flex-direction: column;
+      position: relative;
+      transition: transform 0.2s active;
     }
-    .movie-card:hover {
-      transform: translateY(-6px);
-      border-color: #64748b;
+
+    .movie-card:active {
+      transform: scale(0.96);
     }
-    .movie-card.active {
-      border-color: #3b82f6;
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-    }
+
     .movie-poster {
       width: 100%;
       aspect-ratio: 2 / 3;
       object-fit: cover;
-      display: block;
       background-color: #0f172a;
     }
+
     .movie-info {
-      padding: 12px;
+      padding: 10px;
     }
+
     .movie-info h3 {
       margin: 0 0 4px 0;
-      font-size: 0.9rem;
-      font-weight: 500;
+      font-size: 0.85rem;
+      font-weight: 600;
       color: #f1f5f9;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .movie-tag {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #64748b;
-      text-transform: uppercase;
       font-weight: 600;
+      text-transform: uppercase;
     }
-    .no-results {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 40px;
+
+    /* --- PLAYER SCREEN (MODAL FULLSCREEN TIPO APP) --- */
+    .player-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: #000000;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .player-modal.active {
+      display: flex;
+    }
+
+    .player-header {
+      position: absolute;
+      top: calc(10px + env(safe-area-inset-top));
+      left: 16px;
+      right: 16px;
+      z-index: 1010;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-back {
+      background: rgba(30, 41, 59, 0.8);
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+    }
+
+    .player-wrapper {
+      width: 100%;
+      max-height: 100vh;
+      background: #000;
+    }
+
+    /* --- NOTIFICAÇÃO CONTINUAR ASSISTINDO --- */
+    .resume-banner {
+      display: none;
+      background: #1e293b;
+      border: 1px solid #3b82f6;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 0 16px 20px 16px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .resume-banner.active {
+      display: flex;
+    }
+
+    .resume-info {
+      font-size: 0.85rem;
+      color: #e2e8f0;
+    }
+
+    .resume-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-yes {
+      background: #3b82f6;
+      color: #ffffff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .btn-no {
+      background: #334155;
+      color: #94a3b8;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    /* --- BARRA DE NAVEGAÇÃO INFERIOR (BOTTOM BAR) --- */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(60px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      background: rgba(11, 14, 20, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 900;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
       color: #64748b;
+      font-size: 0.75rem;
+      text-decoration: none;
+    }
+
+    .nav-item.active {
+      color: #3b82f6;
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1 id="movie-title" class="current-title">Carregando...</h1>
-
-    <!-- BARRA DE PERGUNTA CONTINUAR ASSISTINDO -->
-    <div id="resume-banner" class="resume-banner">
-      <div class="resume-info">
-        <span>Deseja continuar assistindo de onde parou em <strong id="resume-time-str">00:00</strong>?</span>
-      </div>
-      <div class="resume-actions">
-        <button id="btn-resume-yes" class="btn-yes">Sim</button>
-        <button id="btn-resume-no" class="btn-no">Não</button>
-      </div>
+  <!-- APP HEADER -->
+  <header class="app-header">
+    <div class="app-logo">
+      <span>🎬</span> CineApp
     </div>
-    
+  </header>
+
+  <!-- HERO BANNER DE DESTAQUE -->
+  <div id="hero-banner" class="hero-banner">
+    <div class="hero-content">
+      <span id="hero-tag" class="hero-tag">Destaque</span>
+      <h2 id="hero-title" class="hero-title">A Queda 2</h2>
+      <button id="btn-play-hero" class="btn-play-hero">
+        ▶ Assistir Agora
+      </button>
+    </div>
+  </div>
+
+  <!-- PERGUNTA CONTINUAR ASSISTINDO -->
+  <div id="resume-banner" class="resume-banner">
+    <div class="resume-info">
+      Continuar de <strong id="resume-time-str">00:00</strong>?
+    </div>
+    <div class="resume-actions">
+      <button id="btn-resume-yes" class="btn-yes">Sim</button>
+      <button id="btn-resume-no" class="btn-no">Não</button>
+    </div>
+  </div>
+
+  <!-- BUSCA E CATEGORIAS -->
+  <div class="section-controls">
+    <input type="text" id="search-input" class="search-input" placeholder="🔍 Buscar filme ou série..." />
+    <div id="categories-filter" class="categories-scroll"></div>
+  </div>
+
+  <!-- CATALOGO / GRADE DE FILMES -->
+  <section class="catalog-section">
+    <h3 class="section-title">Catálogo Completo</h3>
+    <div id="movie-grid" class="movie-grid"></div>
+  </section>
+
+  <!-- PLAYER MODAL TELA CHEIA (ABRE COMO APP NATIVO) -->
+  <div id="player-modal" class="player-modal">
+    <div class="player-header">
+      <button id="btn-close-player" class="btn-back">
+        ← Voltar
+      </button>
+    </div>
     <div class="player-wrapper">
       <video id="player" playsinline controls preload="metadata"></video>
     </div>
-
-    <!-- BARRA DE BUSCA E FILTROS -->
-    <div class="controls-wrapper">
-      <input type="text" id="search-input" class="search-input" placeholder="Buscar por título..." />
-      <div id="categories-filter" class="categories-filter"></div>
-    </div>
-
-    <h2 class="catalog-title">Catálogo</h2>
-    <div id="movie-grid" class="movie-grid"></div>
   </div>
+
+  <!-- NAVEGAÇÃO INFERIOR -->
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <span class="nav-icon">🏠</span>
+      <span>Início</span>
+    </a>
+    <a href="#search-input" class="nav-item">
+      <span class="nav-icon">🔍</span>
+      <span>Buscar</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon">⭐</span>
+      <span>Catálogo</span>
+    </a>
+  </nav>
 
   <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
   <script>
@@ -268,7 +450,6 @@
       }
     ];
 
-    // Variáveis de Estado
     let filmeAtualIndex = 0;
     let categoriaSelecionada = 'Todas';
     let termoBusca = '';
@@ -276,39 +457,38 @@
 
     // Inicializa Player
     const player = new Plyr('#player', {
-      controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'fullscreen'],
+      controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'],
       ratio: '16:9'
     });
 
     const grid = document.getElementById('movie-grid');
-    const titleElement = document.getElementById('movie-title');
     const searchInput = document.getElementById('search-input');
     const categoriesContainer = document.getElementById('categories-filter');
+    const playerModal = document.getElementById('player-modal');
+    const btnClosePlayer = document.getElementById('btn-close-player');
     
-    // Elementos do Banner
+    // Banner e Hero
+    const heroBanner = document.getElementById('hero-banner');
+    const heroTitle = document.getElementById('hero-title');
+    const heroTag = document.getElementById('hero-tag');
+    const btnPlayHero = document.getElementById('btn-play-hero');
+
     const resumeBanner = document.getElementById('resume-banner');
     const resumeTimeStr = document.getElementById('resume-time-str');
     const btnYes = document.getElementById('btn-resume-yes');
     const btnNo = document.getElementById('btn-resume-no');
 
-    // Chave única para o localStorage
     function getStorageKey(filme) {
       return `filme_progresso_${filme.titulo.replace(/\s+/g, '_').toLowerCase()}`;
     }
 
-    // Função auxiliar para formatar segundos em MM:SS ou HH:MM:SS
     function formatarTempo(segundos) {
       const horas = Math.floor(segundos / 3600);
       const minutos = Math.floor((segundos % 3600) / 60);
       const segs = Math.floor(segundos % 60);
-
       const mStr = minutos < 10 && horas > 0 ? `0${minutos}` : `${minutos}`;
       const sStr = segs < 10 ? `0${segs}` : `${segs}`;
-
-      if (horas > 0) {
-        return `${horas}:${mStr}:${sStr}`;
-      }
-      return `${mStr}:${sStr}`;
+      return horas > 0 ? `${horas}:${mStr}:${sStr}` : `${mStr}:${sStr}`;
     }
 
     function esconderBanner() {
@@ -316,14 +496,28 @@
       tempoPendenteGuardado = 0;
     }
 
-    // Carrega o filme selecionado
-    function carregarFilme(index) {
+    function abrirPlayer() {
+      playerModal.classList.add('active');
+    }
+
+    function fecharPlayer() {
+      player.pause();
+      playerModal.classList.remove('active');
+    }
+
+    btnClosePlayer.addEventListener('click', fecharPlayer);
+
+    // FUNÇÃO OTIMIZADA PARA TROCA RÁPIDA E SEM TRAVAMENTOS
+    function carregarEIniciarFilme(index, autoPlay = true) {
       filmeAtualIndex = index;
       const filme = filmes[index];
-      titleElement.textContent = filme.titulo;
-      
+
       esconderBanner();
 
+      // 1. Interrompe a reprodução anterior para limpar memória
+      player.stop();
+
+      // 2. Define a nova fonte no Plyr
       player.source = {
         type: 'video',
         title: filme.titulo,
@@ -331,14 +525,23 @@
         sources: [{ src: filme.url, type: 'video/mp4' }]
       };
 
-      atualizarDestaqueCard();
+      if (autoPlay) {
+        abrirPlayer();
 
-      // Quando o vídeo estiver pronto para leitura de metadados
-      player.once('loadeddata', () => {
+        // 3. Executa a reprodução com tratamento de promessa
+        const playPromise = player.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Previne falhas caso haja restrição de auto-play no navegador
+          });
+        }
+      }
+
+      // 4. Usa 'loadedmetadata' para verificar tempo salvo instantaneamente
+      player.once('loadedmetadata', () => {
         const tempoSalvo = localStorage.getItem(getStorageKey(filme));
         if (tempoSalvo) {
           const segundos = parseFloat(tempoSalvo);
-          
           if (segundos > 5 && (!player.duration || segundos < player.duration - 30)) {
             tempoPendenteGuardado = segundos;
             resumeTimeStr.textContent = formatarTempo(segundos);
@@ -348,16 +551,19 @@
       });
     }
 
-    // Botão "SIM": vai para o tempo guardado e começa a reproduzir
+    btnPlayHero.addEventListener('click', () => {
+      carregarEIniciarFilme(0, true);
+    });
+
     btnYes.addEventListener('click', () => {
       if (tempoPendenteGuardado > 0) {
         player.currentTime = tempoPendenteGuardado;
+        abrirPlayer();
         player.play();
       }
       esconderBanner();
     });
 
-    // Botão "NÃO": ignora e zera o registro de tempo salvo
     btnNo.addEventListener('click', () => {
       const filme = filmes[filmeAtualIndex];
       if (filme) {
@@ -366,28 +572,14 @@
       esconderBanner();
     });
 
-    // Grava continuamente no localStorage
     player.on('timeupdate', () => {
       if (filmes[filmeAtualIndex] && player.currentTime > 0) {
-        const chave = getStorageKey(filmes[filmeAtualIndex]);
-        localStorage.setItem(chave, player.currentTime.toString());
+        localStorage.setItem(getStorageKey(filmes[filmeAtualIndex]), player.currentTime.toString());
       }
     });
 
-    function atualizarDestaqueCard() {
-      document.querySelectorAll('.movie-card').forEach((card) => {
-        const idx = parseInt(card.getAttribute('data-index'));
-        if (idx === filmeAtualIndex) {
-          card.classList.add('active');
-        } else {
-          card.classList.remove('active');
-        }
-      });
-    }
-
     function renderizarGrid() {
       grid.innerHTML = '';
-
       const filmesFiltrados = filmes.filter((filme) => {
         const atendeCategoria = categoriaSelecionada === 'Todas' || filme.categoria === categoriaSelecionada;
         const atendeBusca = filme.titulo.toLowerCase().includes(termoBusca.toLowerCase());
@@ -395,15 +587,14 @@
       });
 
       if (filmesFiltrados.length === 0) {
-        grid.innerHTML = `<div class="no-results">Nenhum filme encontrado.</div>`;
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 20px;">Nenhum filme encontrado.</div>`;
         return;
       }
 
       filmesFiltrados.forEach((filme) => {
         const indexOriginal = filmes.indexOf(filme);
         const card = document.createElement('div');
-        card.className = `movie-card ${indexOriginal === filmeAtualIndex ? 'active' : ''}`;
-        card.setAttribute('data-index', indexOriginal);
+        card.className = 'movie-card';
         card.innerHTML = `
           <img class="movie-poster" src="${filme.poster}" alt="${filme.titulo}" loading="lazy" />
           <div class="movie-info">
@@ -411,7 +602,7 @@
             <span class="movie-tag">${filme.categoria}</span>
           </div>
         `;
-        card.onclick = () => carregarFilme(indexOriginal);
+        card.onclick = () => carregarEIniciarFilme(indexOriginal, true);
         grid.appendChild(card);
       });
     }
@@ -422,11 +613,11 @@
 
       categorias.forEach(cat => {
         const btn = document.createElement('button');
-        btn.className = `category-btn ${cat === 'Todas' ? 'active' : ''}`;
+        btn.className = `category-chip ${cat === 'Todas' ? 'active' : ''}`;
         btn.textContent = cat;
         btn.onclick = () => {
           categoriaSelecionada = cat;
-          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           renderizarGrid();
         };
@@ -434,24 +625,29 @@
       });
     }
 
+    function atualizarHero() {
+      if (filmes.length > 0) {
+        const destaque = filmes[0];
+        heroTitle.textContent = destaque.titulo;
+        heroTag.textContent = destaque.categoria;
+        heroBanner.style.backgroundImage = `url('${destaque.poster}')`;
+      }
+    }
+
     searchInput.addEventListener('input', (e) => {
       termoBusca = e.target.value;
       renderizarGrid();
     });
 
-    // Inicialização do Catálogo
+    // Inicialização
+    atualizarHero();
     inicializarCategorias();
     renderizarGrid();
-    if (filmes.length > 0) {
-      carregarFilme(0);
-    }
 
-    // --- REGISTRO DO SERVICE WORKER (PWA) ---
+    // Service Worker PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registrado:', reg.scope))
-          .catch(err => console.error('Erro ao registrar Service Worker:', err));
+        navigator.serviceWorker.register('./sw.js');
       });
     }
   </script>
