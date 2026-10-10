@@ -2,13 +2,18 @@
   "id": "/",
   "name": "CineApp",
   "short_name": "CineApp",
-  "description": "Aplicativo de Streaming de Vídeo",
+  "description": "Aplicativo de Streaming de Vídeo e Catálogo",
   "start_url": "./index.html",
   "scope": "./",
+  "lang": "pt-BR",
+  "dir": "ltr",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0b0e14",
   "theme_color": "#0b0e14",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "categories": ["entertainment", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.png",
@@ -26,14 +31,14 @@
   "screenshots": [
     {
       "src": "screenshot1.png",
-      "sizes": "1280x720",
+      "sizes": "1905x972",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Ecrã principal"
     },
     {
       "src": "screenshot2.png",
-      "sizes": "750x1334",
+      "sizes": "810x1600",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Player de vídeo"
