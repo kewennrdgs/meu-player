@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cine Catálogo com Retomada de Vídeo</title>
+
+  <!-- Configurações para PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0e14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CineApp">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <style>
     * { box-sizing: border-box; }
@@ -27,7 +36,7 @@
 
     /* --- NOTIFICAÇÃO: CONTINUAR DE ONDE PAROU --- */
     .resume-banner {
-      display: none; /* Escondido por padrão */
+      display: none;
       background: #1e293b;
       border: 1px solid #3b82f6;
       border-radius: 10px;
@@ -332,7 +341,6 @@
         if (tempoSalvo) {
           const segundos = parseFloat(tempoSalvo);
           
-          // Verifica se o tempo faz sentido (mais de 5s e faltam mais de 30s para o fim)
           if (segundos > 5 && (!player.duration || segundos < player.duration - 30)) {
             tempoPendenteGuardado = segundos;
             resumeTimeStr.textContent = formatarTempo(segundos);
@@ -438,6 +446,15 @@
     renderizarGrid();
     if (filmes.length > 0) {
       carregarFilme(0);
+    }
+
+    // --- REGISTRO DO SERVICE WORKER (PWA) ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registrado:', reg.scope))
+          .catch(err => console.error('Erro ao registrar Service Worker:', err));
+      });
     }
   </script>
 </body>
